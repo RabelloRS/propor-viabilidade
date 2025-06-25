@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Interativa de Viabilidade - Loteamento Gravataí (Atualizado)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals Harmony -->
+    <!-- Application Structure Plan: A dashboard-style single-page application, revised to incorporate three development scenarios. The structure remains a top-down flow: 1. A primary interactive "Painel de Controle" for immediate scenario comparison. 2. Supporting "Análise de Mercado" data to justify pricing. 3. A new "Fontes de Dados" section for transparency. 4. "Análise Estratégica" (SWOT) for context. 5. A clear "Plano de Ação". This task-oriented structure allows the user to quickly toggle between scenarios, and now also verify the underlying data sources, increasing the report's credibility. -->
+    <!-- Visualization & Content Choices: 
+        - Financial Scenarios: (Goal: Inform/Compare) -> Interactive metric cards and a 3-bar chart (Chart.js) comparing the VGV of all three scenarios. Interaction: Three buttons toggle the active scenario, updating all cards and highlighting the corresponding bar on the chart.
+        - Market Data: (Goal: Analyze/Justify) -> Two Horizontal Bar Charts (Chart.js) comparing `Valor/m²`.
+        - Data Tables & Links: (Goal: Document/Verify) -> Clean, responsive HTML tables for the market data and a styled list of hyperlinks to the original property listings. This directly addresses the user request for data transparency and source verification.
+        - SWOT & Risks: (Goal: Organize/Inform) -> A 4-column grid (HTML/Tailwind) and a highlighted alert box to emphasize risks.
+        - Action Plan: (Goal: Guide) -> A styled ordered list (timeline format) to present a clear, step-by-step action plan.
+        - Justification: Adding the data sources section makes the tool more robust and auditable, enhancing its value as a decision-making instrument.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #0056b3;
+        }
+        .scenario-btn.active {
+            background-color: #007BFF;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .metric-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        .link-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .link-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Análise de Viabilidade (Atualizada)</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#dashboard" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Painel</a>
+                        <a href="#mercado" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Mercado</a>
+                        <a href="#fontes" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Fontes</a>
+                        <a href="#riscos" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Análise Estratégica</a>
+                        <a href="#passos" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Plano de Ação</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <section id="dashboard" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Painel de Controle do Investidor</h2>
+                <p class="mt-4 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+                    Esta seção foi completamente refeita para refletir a **Lei Municipal nº 4.135/2019** e as áreas exatas do imóvel. Agora você pode comparar três cenários estratégicos, incluindo a opção de **lotes de 125 m²**. Selecione um cenário para ver como o VGV e outros indicadores mudam, ajudando a definir a melhor abordagem para o seu empreendimento.
+                </p>
+            </div>
+
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex rounded-md shadow-sm" role="group">
+                    <button type="button" id="btn-cenario-c" class="scenario-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">
+                        Cenário C: Max. Legal (125m²)
+                    </button>
+                    <button type="button" id="btn-cenario-a" class="scenario-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">
+                        Cenário A: Padrão Médio
+                    </button>
+                    <button type="button" id="btn-cenario-b" class="scenario-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500 active">
+                        Cenário B: Valor Agregado
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <div class="metric-card bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-500">VGV Potencial</h3>
+                    <p id="vgv-value" class="mt-2 text-4xl font-bold text-blue-600"></p>
+                </div>
+                <div class="metric-card bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-500">Nº de Lotes</h3>
+                    <p id="lotes-value" class="mt-2 text-4xl font-bold text-gray-800"></p>
+                </div>
+                 <div class="metric-card bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-500">Preço Médio / Lote</h3>
+                    <p id="preco-lote-value" class="mt-2 text-4xl font-bold text-gray-800"></p>
+                </div>
+                <div class="metric-card bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-500">Área Média / Lote</h3>
+                    <p id="area-lote-value" class="mt-2 text-4xl font-bold text-gray-800"></p>
+                </div>
+                <div class="metric-card bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-base font-semibold text-gray-500">Valor / m² (Venda)</h3>
+                    <p id="valor-m2-value" class="mt-2 text-4xl font-bold text-gray-800"></p>
+                </div>
+                <div class="metric-card bg-white p-6 rounded-xl shadow-md border border-yellow-300 bg-yellow-50">
+                    <h3 class="text-base font-semibold text-yellow-800">Valor Reavaliado do Terreno</h3>
+                    <p class="mt-2 text-3xl font-bold text-yellow-700">R$ 2,1M - R$ 2,7M</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 text-center mb-4">Comparativo de VGV (Valor Geral de Venda) por Cenário</h3>
+                <div class="chart-container">
+                    <canvas id="vgvChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="mercado" class="mt-20 scroll-mt-20">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Análise de Mercado</h2>
+                <p class="mt-4 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+                    Explore os dados que fundamentam a avaliação do terreno e a projeção de preços de venda. Os gráficos abaixo comparam o valor por metro quadrado (m²) de terrenos brutos e de lotes já urbanizados em condomínios de Gravataí, evidenciando o potencial de "salto de valor" em que se baseia a rentabilidade do projeto.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
+                     <h3 class="text-lg font-semibold text-gray-800 text-center mb-4">Valor/m² de Terrenos Brutos (Comparáveis)</h3>
+                    <div class="chart-container h-96">
+                        <canvas id="terrenosChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200">
+                     <h3 class="text-lg font-semibold text-gray-800 text-center mb-4">Valor/m² de Lotes em Condomínios (Produto Final)</h3>
+                     <div class="chart-container h-96">
+                        <canvas id="lotesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fontes" class="mt-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Fontes de Dados e Tabelas</h2>
+                <p class="mt-4 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+                    Para total transparência, esta seção apresenta as tabelas de dados que fundamentaram a análise de mercado e os links diretos para os anúncios de imóveis utilizados como referência.
+                </p>
+            </div>
+
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Tabela 1: Análise Comparativa de Mercado - Terrenos Brutos</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bairro</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área (m²)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor (R$)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor/m² (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Santa Fé</td><td class="px-6 py-4 whitespace-nowrap">1.040</td><td class="px-6 py-4 whitespace-nowrap">600.000</td><td class="px-6 py-4 whitespace-nowrap">577</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Vera Cruz</td><td class="px-6 py-4 whitespace-nowrap">4.290</td><td class="px-6 py-4 whitespace-nowrap">2.436.750</td><td class="px-6 py-4 whitespace-nowrap">568</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Centro</td><td class="px-6 py-4 whitespace-nowrap">8.625</td><td class="px-6 py-4 whitespace-nowrap">3.700.000</td><td class="px-6 py-4 whitespace-nowrap">429</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">São Geraldo</td><td class="px-6 py-4 whitespace-nowrap">2.886</td><td class="px-6 py-4 whitespace-nowrap">750.000</td><td class="px-6 py-4 whitespace-nowrap">260</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 mb-12">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Tabela 2: Análise Comparativa - Lotes Urbanizados em Condomínios</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condomínio</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Padrão</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área (m²)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor (R$)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor/m² (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Landscape Seminário</td><td class="px-6 py-4 whitespace-nowrap">Alto</td><td class="px-6 py-4 whitespace-nowrap">284</td><td class="px-6 py-4 whitespace-nowrap">365.000</td><td class="px-6 py-4 whitespace-nowrap">1.285</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Mirá Condomínio Clube</td><td class="px-6 py-4 whitespace-nowrap">Médio-Alto</td><td class="px-6 py-4 whitespace-nowrap">203</td><td class="px-6 py-4 whitespace-nowrap">315.000</td><td class="px-6 py-4 whitespace-nowrap">1.551</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Monet Residence</td><td class="px-6 py-4 whitespace-nowrap">Médio-Alto</td><td class="px-6 py-4 whitespace-nowrap">400</td><td class="px-6 py-4 whitespace-nowrap">363.500</td><td class="px-6 py-4 whitespace-nowrap">909</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Província Di Gênova</td><td class="px-6 py-4 whitespace-nowrap">Médio</td><td class="px-6 py-4 whitespace-nowrap">300</td><td class="px-6 py-4 whitespace-nowrap">245.000</td><td class="px-6 py-4 whitespace-nowrap">817</td></tr>
+                            <tr><td class="px-6 py-4 whitespace-nowrap">Terras Alpha</td><td class="px-6 py-4 whitespace-nowrap">Médio-Alto</td><td class="px-6 py-4 whitespace-nowrap">261</td><td class="px-6 py-4 whitespace-nowrap">369.000</td><td class="px-6 py-4 whitespace-nowrap">1.414</td></tr>
+                             <tr><td class="px-6 py-4 whitespace-nowrap">Reserva Dom Feliciano</td><td class="px-6 py-4 whitespace-nowrap">Médio</td><td class="px-6 py-4 whitespace-nowrap">400</td><td class="px-6 py-4 whitespace-nowrap">270.000</td><td class="px-6 py-4 whitespace-nowrap">675</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">Links das Fontes Pesquisadas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <a href="https://www.chavesnamao.com.br/terreno-a-venda/rs/gravatai/santa-fe/1040m2-600000-cod-terrenosanta-fe-124/" target="_blank" class="link-card block bg-white p-6 rounded-lg shadow-md hover:shadow-xl border">
+                    <p class="font-semibold text-blue-600">Terreno em Santa Fé</p>
+                    <p class="text-sm text-gray-600">Área: 1.040 m² | Valor: R$ 600.000</p>
+                </a>
+                 <a href="https://www.vivareal.com.br/terreno-ou-lote/rio-grande-do-sul/gravatai/" target="_blank" class="link-card block bg-white p-6 rounded-lg shadow-md hover:shadow-xl border">
+                    <p class="font-semibold text-blue-600">Busca Geral Viva Real</p>
+                    <p class="text-sm text-gray-600">Fonte para Terrenos em Vera Cruz, Centro, São Geraldo e Cond. Província Di Gênova.</p>
+                </a>
+                <a href="https://www.zapimoveis.com.br/venda/terreno-padrao/rs+gravatai/" target="_blank" class="link-card block bg-white p-6 rounded-lg shadow-md hover:shadow-xl border">
+                    <p class="font-semibold text-blue-600">Busca Geral ZAP Imóveis</p>
+                    <p class="text-sm text-gray-600">Fonte para Cond. Monet Residence e Reserva Dom Feliciano.</p>
+                </a>
+                 <a href="https://www.ninoimoveis.com.br/imovel/terreno-residencial-a-venda-centro-gravatai-rs/TE0967" target="_blank" class="link-card block bg-white p-6 rounded-lg shadow-md hover:shadow-xl border">
+                    <p class="font-semibold text-blue-600">Condomínio Landscape Seminário</p>
+                    <p class="text-sm text-gray-600">Área: 284 m² | Valor: R$ 365.000</p>
+                </a>
+                <a href="https://pessato.com.br/imoveis/a-venda/gravatai/sao-vicente" target="_blank" class="link-card block bg-white p-6 rounded-lg shadow-md hover:shadow-xl border">
+                    <p class="font-semibold text-blue-600">Busca em São Vicente</p>
+                    <p class="text-sm text-gray-600">Fonte para análise do mercado de alto padrão (região do Alphaville).</p>
+                </a>
+                 <a href="https://www.chavesnamao.com.br/terreno-a-venda/rs/gravatai/sao-vicente/261m2-369000-cod-te0001-terrasalpha/" target="_blank" class="link-card block bg-white p-6 rounded-lg shadow-md hover:shadow-xl border">
+                    <p class="font-semibold text-blue-600">Condomínio Terras Alpha</p>
+                    <p class="text-sm text-gray-600">Área: 261 m² | Valor: R$ 369.000</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="riscos" class="mt-20 scroll-mt-20">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Análise Estratégica (SWOT)</h2>
+                <p class="mt-4 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+                    Esta seção detalha os pontos fortes, as fraquezas, as oportunidades e as ameaças do projeto. A compreensão destes fatores é crucial para mitigar riscos e maximizar o potencial de sucesso do empreendimento, especialmente o risco regulatório.
+                </p>
+            </div>
+
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg mb-12 shadow-md">
+                <h4 class="font-bold text-xl">� Ameaça Crítica: Hierarquia das Leis</h4>
+                <p class="mt-2">Mesmo que a Lei de Condomínios (nº 4.135/2019) permita lotes de 125 m², o Plano Diretor (Lei nº 1.541/2000) pode estabelecer um lote mínimo superior para a zona específica do imóvel. No direito urbanístico, a lei mais restritiva geralmente prevalece. Portanto, existe um risco real de que a prefeitura exija um lote maior, o que invalidaria o Cenário C. **A Consulta de Viabilidade Urbanística é a única forma de sanar esta dúvida e é uma ação inadiável.**</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-gray-700">
+                <div class="bg-green-50 border border-green-200 p-6 rounded-lg shadow-sm">
+                    <h4 class="text-lg font-semibold text-green-800 mb-2">💪 Forças</h4>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li>Localização em bairro consolidado (Santa Fé).</li>
+                        <li>Excelente testada do terreno (54,20m), ideal para condomínio.</li>
+                        <li>Topografia local tende a ser favorável, reduzindo custos.</li>
+                        <li>Mercado de condomínios aquecido em Gravataí.</li>
+                    </ul>
+                </div>
+                <div class="bg-orange-50 border border-orange-200 p-6 rounded-lg shadow-sm">
+                    <h4 class="text-lg font-semibold text-orange-800 mb-2">🔗 Fraquezas</h4>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li>Custo de aquisição do terreno é elevado (R$2.1M+).</li>
+                        <li>Forte dependência da aprovação municipal (risco regulatório).</li>
+                        <li>Incerteza sobre aceitação de mercado para lotes de 125m² em condomínio.</li>
+                    </ul>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg shadow-sm">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-2">✨ Oportunidades</h4>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li>Alto potencial de "salto de valor" com a urbanização.</li>
+                        <li>Flexibilidade para atacar 3 segmentos: econômico, médio e médio-alto.</li>
+                        <li>Atender nicho de mercado de condomínios mais acessíveis (Cenário C).</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 border border-red-200 p-6 rounded-lg shadow-sm">
+                    <h4 class="text-lg font-semibold text-red-800 mb-2">⚠️ Ameaças</h4>
+                     <ul class="space-y-2 list-disc list-inside">
+                        <li><strong>Risco Regulatório (Principal).</strong></li>
+                        <li>Concorrência com outros condomínios na cidade.</li>
+                        <li>Fatores macroeconômicos (juros, renda).</li>
+                        <li>Aumento dos custos de construção.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="passos" class="mt-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Plano de Ação: Próximos Passos</h2>
+                <p class="mt-4 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+                   Para avançar com segurança, o relatório recomenda um roteiro claro de ações. Siga estes passos para transformar a análise de viabilidade em um plano de negócios concreto e fundamentar a decisão final de investimento. A primeira etapa é a mais crítica.
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <ol class="relative border-l border-gray-300">                  
+                    <li class="mb-10 ml-6">            
+                        <span class="absolute flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full -left-4 ring-8 ring-white">
+                            <span class="font-bold text-blue-800">1</span>
+                        </span>
+                        <h3 class="flex items-center mb-1 text-lg font-semibold text-gray-900">Consulta de Viabilidade Urbanística <span class="bg-red-100 text-red-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded ml-3">Prioridade Máxima</span></h3>
+                        <p class="mb-4 text-base font-normal text-gray-600">Contratar um profissional local para protocolar a consulta na SMDUR e obter os parâmetros construtivos oficiais, questionando especificamente sobre o lote mínimo aplicável (Lei 4.135 vs. Plano Diretor). Esta é a etapa mais crítica e deve preceder qualquer outro investimento.</p>
+                    </li>
+                    <li class="mb-10 ml-6">
+                        <span class="absolute flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full -left-4 ring-8 ring-white">
+                           <span class="font-bold text-blue-800">2</span>
+                        </span>
+                        <h3 class="mb-1 text-lg font-semibold text-gray-900">Orçamento Detalhado de Infraestrutura</h3>
+                        <p class="text-base font-normal text-gray-600">Com os três cenários em mãos, obter cotações para infraestrutura completa. É vital comparar o custo de urbanizar para 41 lotes versus 17 ou 13 lotes para entender o impacto no resultado final.</p>
+                    </li>
+                    <li class="mb-10 ml-6">
+                        <span class="absolute flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full -left-4 ring-8 ring-white">
+                            <span class="font-bold text-blue-800">3</span>
+                        </span>
+                        <h3 class="mb-1 text-lg font-semibold text-gray-900">Pesquisa de Mercado Qualitativa</h3>
+                        <p class="text-base font-normal text-gray-600">Apresentar os três cenários para corretores e imobiliárias locais para validar o apelo comercial, especialmente a aceitação e a precificação para os lotes de 125 m².</p>
+                    </li>
+                    <li class="ml-6">
+                        <span class="absolute flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full -left-4 ring-8 ring-white">
+                            <span class="font-bold text-blue-800">4</span>
+                        </span>
+                        <h3 class="mb-1 text-lg font-semibold text-gray-900">Decisão Final de Investimento</h3>
+                        <p class="text-base font-normal text-gray-600">Com a resposta da consulta e os orçamentos, consolidar tudo em um Fluxo de Caixa completo para cada cenário viável e calcular os indicadores finais (TIR, VPL) para tomar a decisão.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-white mt-16 border-t">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; 2024 Análise Interativa de Viabilidade. Estudo refeito com base na Lei 4.135/2019 e dados de área fornecidos.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const projectData = {
+                 cenarioC: {
+                    vgv: 3587500,
+                    lotes: 41,
+                    precoLote: 87500,
+                    areaLote: 125,
+                    valorM2: 700,
+                    label: "Cenário C: Padrão Econômico"
+                },
+                cenarioA: {
+                    vgv: 4335000,
+                    lotes: 17,
+                    precoLote: 255000,
+                    areaLote: 300,
+                    valorM2: 850,
+                    label: "Cenário A: Padrão Médio"
+                },
+                cenarioB: {
+                    vgv: 4983225,
+                    lotes: 13,
+                    precoLote: 383325,
+                    areaLote: 403,
+                    valorM2: 950,
+                    label: "Cenário B: Valor Agregado"
+                }
+            };
+
+            const marketData = {
+                terrenos: [
+                    { bairro: "São Geraldo", valor: 260 },
+                    { bairro: "Centro", valor: 429 },
+                    { bairro: "Vera Cruz", valor: 568 },
+                    { bairro: "Santa Fé", valor: 577 },
+                ],
+                lotes: [
+                    { nome: "Reserva Dom Feliciano", valor: 675 },
+                    { nome: "Província Di Gênova", valor: 817 },
+                    { nome: "Monet Residence", valor: 909 },
+                    { nome: "Landscape Seminário", valor: 1285 },
+                    { nome: "Terras Alpha", valor: 1414 },
+                ]
+            };
+            
+            const vgvValueEl = document.getElementById('vgv-value');
+            const lotesValueEl = document.getElementById('lotes-value');
+            const precoLoteValueEl = document.getElementById('preco-lote-value');
+            const areaLoteValueEl = document.getElementById('area-lote-value');
+            const valorM2ValueEl = document.getElementById('valor-m2-value');
+            const btnCenarioA = document.getElementById('btn-cenario-a');
+            const btnCenarioB = document.getElementById('btn-cenario-b');
+            const btnCenarioC = document.getElementById('btn-cenario-c');
+
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(value);
+            }
+
+            function updateDashboard(scenario) {
+                const data = projectData[scenario];
+                vgvValueEl.textContent = formatCurrency(data.vgv);
+                lotesValueEl.textContent = `${data.lotes} lotes`;
+                precoLoteValueEl.textContent = formatCurrency(data.precoLote);
+                areaLoteValueEl.textContent = `${data.areaLote} m²`;
+                valorM2ValueEl.textContent = `${formatCurrency(data.valorM2)} / m²`;
+
+                btnCenarioA.classList.remove('active');
+                btnCenarioB.classList.remove('active');
+                btnCenarioC.classList.remove('active');
+                
+                const backgroundColors = {
+                    cenarioC: ['#3B82F6', '#9CA3AF', '#9CA3AF'],
+                    cenarioA: ['#9CA3AF', '#3B82F6', '#9CA3AF'],
+                    cenarioB: ['#9CA3AF', '#9CA3AF', '#3B82F6']
+                };
+
+                const buttonId = `btn-cenario-${scenario.slice(-1).toLowerCase()}`;
+                document.getElementById(buttonId).classList.add('active');
+                vgvChart.data.datasets[0].backgroundColor = backgroundColors[scenario];
+                vgvChart.update();
+            }
+
+            btnCenarioA.addEventListener('click', () => updateDashboard('cenarioA'));
+            btnCenarioB.addEventListener('click', () => updateDashboard('cenarioB'));
+            btnCenarioC.addEventListener('click', () => updateDashboard('cenarioC'));
+
+
+            const vgvCtx = document.getElementById('vgvChart').getContext('2d');
+            const vgvChart = new Chart(vgvCtx, {
+                type: 'bar',
+                data: {
+                    labels: [projectData.cenarioC.label, projectData.cenarioA.label, projectData.cenarioB.label],
+                    datasets: [{
+                        label: 'VGV Projetado',
+                        data: [projectData.cenarioC.vgv, projectData.cenarioA.vgv, projectData.cenarioB.vgv],
+                        backgroundColor: ['#9CA3AF', '#9CA3AF', '#3B82F6'],
+                        borderColor: ['#6B7280', '#6B7280', '#1D4ED8'],
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        barPercentage: 0.6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` VGV: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const terrenosCtx = document.getElementById('terrenosChart').getContext('2d');
+            new Chart(terrenosCtx, {
+                type: 'bar',
+                data: {
+                    labels: marketData.terrenos.map(d => d.bairro),
+                    datasets: [{
+                        label: 'Valor por m²',
+                        data: marketData.terrenos.map(d => d.valor),
+                        backgroundColor: '#FBBF24',
+                        borderColor: '#F59E0B',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${formatCurrency(context.raw)} / m²`;
+                                }
+                            }
+                        }
+                    },
+                     scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const lotesCtx = document.getElementById('lotesChart').getContext('2d');
+            new Chart(lotesCtx, {
+                type: 'bar',
+                data: {
+                    labels: marketData.lotes.map(d => d.nome),
+                    datasets: [{
+                        label: 'Valor por m²',
+                        data: marketData.lotes.map(d => d.valor),
+                        backgroundColor: '#34D399',
+                        borderColor: '#10B981',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                     plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${formatCurrency(context.raw)} / m²`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                             ticks: {
+                                callback: function(value, index, values) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            updateDashboard('cenarioB');
+        });
+    </script>
+
+</body>
+</html>
+�

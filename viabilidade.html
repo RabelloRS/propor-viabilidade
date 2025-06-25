@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudo de Viabilidade - Propor Engenharia</title>
+    <meta name="description" content="Análise completa de viabilidade do empreendimento em Gravataí. Três cenários de desenvolvimento com projeções financeiras detalhadas.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="icone_propor.ico">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 58, 138, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.4);
+        }
+        .propor-logo {
+            height: 40px;
+            width: auto;
+        }
+        .scenario-card {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .scenario-card.active {
+            border-color: #1e3a8a;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header/Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <a href="index.html">
+                            <img class="propor-logo" src="LOGO_PROPOR_MEDIO.jpg" alt="Propor Engenharia">
+                        </a>
+                    </div>
+                    <div class="hidden md:block ml-10">
+                        <div class="flex items-baseline space-x-4">
+                            <a href="index.html#empreendimento" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Empreendimento</a>
+                            <a href="viabilidade.html" class="text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Viabilidade</a>
+                            <a href="index.html#analise" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Análise Técnica</a>
+                            <a href="index.html#mercado" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Mercado</a>
+                            <a href="index.html#sobre" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Sobre</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <a href="index.html#contato" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-phone mr-2"></i>Contato
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">Estudo de Viabilidade</h1>
+                <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+                    Análise técnica completa com três cenários de desenvolvimento e projeções financeiras detalhadas
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scenario Selection -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Selecione o Cenário</h2>
+                <p class="text-gray-600">Escolha entre os três cenários de desenvolvimento para visualizar as projeções</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="scenario-card active bg-white rounded-xl p-6 shadow-lg cursor-pointer" data-scenario="conservador">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Cenário Conservador</h3>
+                        <p class="text-gray-600 text-sm mb-4">Desenvolvimento gradual com baixo risco</p>
+                        <div class="text-2xl font-bold text-blue-600">32 lotes</div>
+                        <div class="text-sm text-gray-500">VGV: R$ 5,8M</div>
+                    </div>
+                </div>
+
+                <div class="scenario-card bg-white rounded-xl p-6 shadow-lg cursor-pointer" data-scenario="moderado">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-balance-scale text-2xl text-green-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Cenário Moderado</h3>
+                        <p class="text-gray-600 text-sm mb-4">Equilíbrio entre risco e retorno</p>
+                        <div class="text-2xl font-bold text-green-600">40 lotes</div>
+                        <div class="text-sm text-gray-500">VGV: R$ 7,2M</div>
+                    </div>
+                </div>
+
+                <div class="scenario-card bg-white rounded-xl p-6 shadow-lg cursor-pointer" data-scenario="otimista">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-rocket text-2xl text-yellow-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Cenário Otimista</h3>
+                        <p class="text-gray-600 text-sm mb-4">Máximo aproveitamento do potencial</p>
+                        <div class="text-2xl font-bold text-yellow-600">48 lotes</div>
+                        <div class="text-sm text-gray-500">VGV: R$ 8,5M</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Financial Metrics -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Métricas Financeiras</h2>
+                <p class="text-gray-600">Indicadores de rentabilidade e viabilidade do projeto</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2" id="vgv-value">R$ 5,8M</div>
+                    <div class="text-sm text-gray-600">Valor Geral de Vendas</div>
+                </div>
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2" id="roi-value">18,5%</div>
+                    <div class="text-sm text-gray-600">ROI Projetado</div>
+                </div>
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-purple-600 mb-2" id="payback-value">4,2 anos</div>
+                    <div class="text-sm text-gray-600">Payback</div>
+                </div>
+                <div class="metric-card rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2" id="lucro-value">R$ 1,2M</div>
+                    <div class="text-sm text-gray-600">Lucro Líquido</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Distribuição de Custos</h3>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Fluxo de Caixa</h3>
+                    <div class="chart-container">
+                        <canvas id="cashflowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Analysis -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Análise Detalhada</h2>
+                <p class="text-gray-600">Breakdown completo dos custos e receitas por cenário</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Costs Breakdown -->
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Estrutura de Custos</h3>
+                    <div class="space-y-4" id="costs-breakdown">
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Aquisição do Terreno</span>
+                            <span class="font-bold text-blue-600">R$ 1,2M</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Projetos e Licenças</span>
+                            <span class="font-bold text-blue-600">R$ 180K</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Infraestrutura</span>
+                            <span class="font-bold text-blue-600">R$ 420K</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Marketing e Vendas</span>
+                            <span class="font-bold text-blue-600">R$ 290K</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Administrativo</span>
+                            <span class="font-bold text-blue-600">R$ 150K</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg border-t-2 border-blue-600">
+                            <span class="font-bold">Total de Custos</span>
+                            <span class="font-bold text-blue-600">R$ 2,24M</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Projection -->
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Projeção de Receitas</h3>
+                    <div class="space-y-4" id="revenue-breakdown">
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Lotes Residenciais (24)</span>
+                            <span class="font-bold text-green-600">R$ 3,6M</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Lotes Comerciais (8)</span>
+                            <span class="font-bold text-green-600">R$ 2,2M</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                            <span class="font-medium">Áreas Comuns</span>
+                            <span class="font-bold text-green-600">R$ 0K</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg border-t-2 border-green-600">
+                            <span class="font-bold">Receita Total</span>
+                            <span class="font-bold text-green-600">R$ 5,8M</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg border-t-2 border-orange-600">
+                            <span class="font-bold">Lucro Líquido</span>
+                            <span class="font-bold text-orange-600">R$ 1,2M</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Analysis -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Análise de Mercado</h2>
+                <p class="text-gray-600">Dados de mercado e comparativos de preços em Gravataí</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Preço Médio do m²</h3>
+                    <div class="text-2xl font-bold text-blue-600 mb-2">R$ 1.850</div>
+                    <p class="text-sm text-gray-600">Baseado em 15 empreendimentos similares na região</p>
+                </div>
+
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-trending-up text-green-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Crescimento Anual</h3>
+                    <div class="text-2xl font-bold text-green-600 mb-2">8,5%</div>
+                    <p class="text-sm text-gray-600">Taxa de valorização média dos últimos 3 anos</p>
+                </div>
+
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-clock text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Tempo de Venda</h3>
+                    <div class="text-2xl font-bold text-yellow-600 mb-2">18 meses</div>
+                    <p class="text-sm text-gray-600">Prazo médio para venda de lotes similares</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Risk Analysis -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Análise de Riscos</h2>
+                <p class="text-gray-600">Identificação e mitigação dos principais riscos do projeto</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Riscos Identificados</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                            <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Risco de Mercado</h4>
+                                <p class="text-sm text-gray-600">Possível desaceleração do mercado imobiliário</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                            <i class="fas fa-clock text-yellow-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Risco de Prazo</h4>
+                                <p class="text-sm text-gray-600">Atrasos na aprovação de projetos e licenças</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                            <i class="fas fa-dollar-sign text-blue-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Risco de Custo</h4>
+                                <p class="text-sm text-gray-600">Aumento nos custos de materiais e mão de obra</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Estratégias de Mitigação</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <i class="fas fa-shield-alt text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Diversificação</h4>
+                                <p class="text-sm text-gray-600">Mix de produtos residenciais e comerciais</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <i class="fas fa-file-contract text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Contratos Firmes</h4>
+                                <p class="text-sm text-gray-600">Negociação de preços fixos com fornecedores</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <i class="fas fa-chart-line text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Monitoramento</h4>
+                                <p class="text-sm text-gray-600">Acompanhamento contínuo de indicadores de mercado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 hero-gradient">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold text-white mb-6">Interessado no projeto?</h2>
+            <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                Entre em contato para agendar uma apresentação detalhada ou solicitar informações adicionais
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="index.html#contato" class="btn-secondary text-white px-8 py-4 rounded-lg font-bold text-lg">
+                    <i class="fas fa-calendar mr-2"></i>Agendar Apresentação
+                </a>
+                <a href="index.html#contato" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-900 transition-colors">
+                    <i class="fas fa-phone mr-2"></i>Falar com Especialista
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <img src="LOGO_PROPOR_PEQUENO.jpg" alt="Propor Engenharia" class="h-12 mb-4">
+                    <p class="text-gray-400 mb-4">
+                        Especialistas em estudos de viabilidade imobiliária e projetos de engenharia civil.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-4">Links Rápidos</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html#empreendimento" class="text-gray-400 hover:text-white transition-colors">Empreendimento</a></li>
+                        <li><a href="viabilidade.html" class="text-gray-400 hover:text-white transition-colors">Viabilidade</a></li>
+                        <li><a href="index.html#analise" class="text-gray-400 hover:text-white transition-colors">Análise Técnica</a></li>
+                        <li><a href="index.html#sobre" class="text-gray-400 hover:text-white transition-colors">Sobre Nós</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-4">Contato</h3>
+                    <div class="space-y-2 text-gray-400">
+                        <p><i class="fas fa-phone mr-2"></i>(51) 99999-9999</p>
+                        <p><i class="fas fa-envelope mr-2"></i>contato@propor.eng.br</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i>Gravataí/RS</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 my-8"></div>
+            <div class="text-center text-gray-400">
+                <p>&copy; 2025 Propor Engenharia Ltda. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Scenario data
+        const scenarios = {
+            conservador: {
+                vgv: 'R$ 5,8M',
+                roi: '18,5%',
+                payback: '4,2 anos',
+                lucro: 'R$ 1,2M',
+                lotes: 32,
+                receitas: {
+                    residencial: 'R$ 3,6M',
+                    comercial: 'R$ 2,2M',
+                    comum: 'R$ 0K',
+                    total: 'R$ 5,8M',
+                    lucro: 'R$ 1,2M'
+                }
+            },
+            moderado: {
+                vgv: 'R$ 7,2M',
+                roi: '22,3%',
+                payback: '3,8 anos',
+                lucro: 'R$ 1,6M',
+                lotes: 40,
+                receitas: {
+                    residencial: 'R$ 4,5M',
+                    comercial: 'R$ 2,7M',
+                    comum: 'R$ 0K',
+                    total: 'R$ 7,2M',
+                    lucro: 'R$ 1,6M'
+                }
+            },
+            otimista: {
+                vgv: 'R$ 8,5M',
+                roi: '25,8%',
+                payback: '3,4 anos',
+                lucro: 'R$ 2,1M',
+                lotes: 48,
+                receitas: {
+                    residencial: 'R$ 5,4M',
+                    comercial: 'R$ 3,1M',
+                    comum: 'R$ 0K',
+                    total: 'R$ 8,5M',
+                    lucro: 'R$ 2,1M'
+                }
+            }
+        };
+
+        // Initialize charts
+        let costChart, cashflowChart;
+
+        function initCharts() {
+            // Cost Distribution Chart
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            costChart = new Chart(costCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Terreno', 'Projetos', 'Infraestrutura', 'Marketing', 'Administrativo'],
+                    datasets: [{
+                        data: [1200, 180, 420, 290, 150],
+                        backgroundColor: [
+                            '#1e3a8a',
+                            '#3b82f6',
+                            '#60a5fa',
+                            '#93c5fd',
+                            '#dbeafe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Cash Flow Chart
+            const cashflowCtx = document.getElementById('cashflowChart').getContext('2d');
+            cashflowChart = new Chart(cashflowCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mês 0', 'Mês 6', 'Mês 12', 'Mês 18', 'Mês 24', 'Mês 30'],
+                    datasets: [{
+                        label: 'Fluxo de Caixa',
+                        data: [-2240, -1800, -1200, -400, 800, 1200],
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + (value/1000) + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update scenario
+        function updateScenario(scenario) {
+            const data = scenarios[scenario];
+            
+            // Update metrics
+            document.getElementById('vgv-value').textContent = data.vgv;
+            document.getElementById('roi-value').textContent = data.roi;
+            document.getElementById('payback-value').textContent = data.payback;
+            document.getElementById('lucro-value').textContent = data.lucro;
+
+            // Update revenue breakdown
+            const revenueBreakdown = document.getElementById('revenue-breakdown');
+            revenueBreakdown.innerHTML = `
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                    <span class="font-medium">Lotes Residenciais (${Math.floor(data.lotes * 0.75)})</span>
+                    <span class="font-bold text-green-600">${data.receitas.residencial}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                    <span class="font-medium">Lotes Comerciais (${Math.floor(data.lotes * 0.25)})</span>
+                    <span class="font-bold text-green-600">${data.receitas.comercial}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                    <span class="font-medium">Áreas Comuns</span>
+                    <span class="font-bold text-green-600">${data.receitas.comum}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border-t-2 border-green-600">
+                    <span class="font-bold">Receita Total</span>
+                    <span class="font-bold text-green-600">${data.receitas.total}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border-t-2 border-orange-600">
+                    <span class="font-bold">Lucro Líquido</span>
+                    <span class="font-bold text-orange-600">${data.receitas.lucro}</span>
+                </div>
+            `;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            
+            // Scenario selection
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove active class from all cards
+                    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked card
+                    this.classList.add('active');
+                    
+                    // Update scenario
+                    const scenario = this.dataset.scenario;
+                    updateScenario(scenario);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

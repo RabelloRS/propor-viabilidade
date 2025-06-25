@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Zoneamento - Propor Engenharia</title>
+    <meta name="description" content="Painel interativo de zoneamento urbano de Gravataí/RS. Análise técnica da legislação e mapas do Plano Diretor Municipal.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="icone_propor.ico">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A estrutura foi desenhada para facilitar a descoberta e o entendimento, em vez de replicar a ordem linear do relatório. Começa com uma visão geral do conceito mais importante (o Plano Diretor), seguida pela seção principal e interativa focada na tarefa do usuário: o acesso aos links e mapas. Uma linha do tempo visual contextualiza a evolução do plano, tornando a informação mais assimilável. Finalmente, seções menores identificam os responsáveis e concluem o tema. Esta arquitetura orientada à tarefa prioriza a usabilidade e a clareza. -->
+    <!-- Visualization & Content Choices: Informação do Relatório -> Links para mapas e leis. Objetivo -> Organizar e facilitar o acesso. Método de Apresentação -> Cartões interativos com filtros em vez de uma tabela estática. Interação -> Botões de filtro (Todos, Mapas, Legislação) que usam JS para exibir/ocultar cartões. Justificativa -> Mais intuitivo e visualmente atraente que uma tabela, permite que o usuário encontre rapidamente o que precisa. | Informação -> Histórico do Plano Diretor. Objetivo -> Mostrar a mudança ao longo do tempo. Método -> Linha do tempo visual (HTML/CSS). Interação -> Hover para destacar. Justificativa -> Mais envolvente e fácil de entender do que um parágrafo de texto. Nenhuma biblioteca de gráficos foi usada, pois o relatório não contém dados quantitativos. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+        }
+        .propor-logo {
+            height: 40px;
+            width: auto;
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            top: 1.25rem;
+            left: -0.4rem;
+            width: 0.8rem;
+            height: 0.8rem;
+            background-color: #1e3a8a;
+            border-radius: 9999px;
+            border: 2px solid #f8fafc;
+        }
+        .timeline-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 1.75rem;
+            left: -0.1rem;
+            width: 2px;
+            height: calc(100% - 0.5rem);
+            background-color: #e2e8f0;
+        }
+        .link-card {
+            transition: all 0.3s ease;
+        }
+        .link-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 58, 138, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header/Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <a href="index.html">
+                            <img class="propor-logo" src="LOGO_PROPOR_MEDIO.jpg" alt="Propor Engenharia">
+                        </a>
+                    </div>
+                    <div class="hidden md:block ml-10">
+                        <div class="flex items-baseline space-x-4">
+                            <a href="index.html#empreendimento" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Empreendimento</a>
+                            <a href="viabilidade.html" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Viabilidade</a>
+                            <a href="link_zoneamento.html" class="text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Análise Técnica</a>
+                            <a href="index.html#mercado" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Mercado</a>
+                            <a href="index.html#sobre" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Sobre</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <a href="index.html#contato" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-phone mr-2"></i>Contato
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">Análise de Zoneamento Urbano</h1>
+                <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+                    Painel interativo para explorar as fontes de informação, mapas e a legislação do Plano Diretor Municipal de Gravataí/RS
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
+
+        <main>
+            <section id="overview" class="mb-16 bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-map-marked-alt text-blue-600 mr-3 text-2xl"></i> O que é o Plano Diretor?
+                </h2>
+                <p class="text-base md:text-lg leading-relaxed mb-4 text-gray-700">
+                    O Plano Diretor de Desenvolvimento Urbano (PDDU) é o principal instrumento legal que define como a cidade de Gravataí deve crescer e se desenvolver. Ele estabelece as regras para o uso e a ocupação do solo, buscando um crescimento ordenado e sustentável. Este documento é dinâmico e passa por revisões periódicas para se adaptar às novas necessidades da cidade.
+                </p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg mt-6">
+                    <h3 class="font-semibold">Status Atual</h3>
+                    <p class="mt-1">O Plano Diretor está em processo de revisão desde 2021 para atualizar suas diretrizes. É fundamental consultar sempre as fontes oficiais para obter as informações mais recentes.</p>
+                </div>
+            </section>
+
+            <section id="map-access" class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2 text-center">Acesso às Fontes de Informação</h2>
+                <p class="text-lg text-gray-600 text-center mb-8">Filtre os links para encontrar rapidamente mapas, leis e portais oficiais.</p>
+                
+                <div id="filter-container" class="flex justify-center flex-wrap gap-2 mb-8">
+                    <button class="filter-btn active py-2 px-4 rounded-full bg-white border border-gray-300 hover:bg-gray-100 transition-colors" data-filter="all">Todos</button>
+                    <button class="filter-btn py-2 px-4 rounded-full bg-white border border-gray-300 hover:bg-gray-100 transition-colors" data-filter="mapa">📍 Mapas</button>
+                    <button class="filter-btn py-2 px-4 rounded-full bg-white border border-gray-300 hover:bg-gray-100 transition-colors" data-filter="legislacao">⚖️ Legislação</button>
+                    <button class="filter-btn py-2 px-4 rounded-full bg-white border border-gray-300 hover:bg-gray-100 transition-colors" data-filter="portal">🌐 Portais</button>
+                </div>
+
+                <div id="links-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+
+            <section id="process" class="mb-16">
+                 <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Evolução e Revisão do Plano Diretor</h2>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                    <div class="relative pl-8">
+                        <div class="timeline-item relative pb-8">
+                            <h3 class="font-semibold text-lg text-gray-900">Lei Municipal nº 1.541/2000</h3>
+                            <p class="text-gray-600 mt-1">Estabelecimento do Plano Diretor de Desenvolvimento Urbano (PDDU) original, definindo a base da política de desenvolvimento urbano.</p>
+                        </div>
+                        <div class="timeline-item relative pb-8">
+                            <h3 class="font-semibold text-lg text-gray-900">Lei Municipal nº 4.315/2021</h3>
+                            <p class="text-gray-600 mt-1">Aprovação da última alteração de zoneamento do PDDU, atualizando as diretrizes para a ocupação do território.</p>
+                        </div>
+                        <div class="timeline-item relative pb-2">
+                            <h3 class="font-semibold text-lg text-gray-900">Início do Processo de Revisão (Julho de 2021)</h3>
+                            <p class="text-gray-600 mt-1">Contratação de consórcio especializado para a revisão completa do Plano Diretor, iniciando um processo participativo com audiências públicas e consultas à comunidade.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="key-players" class="text-center bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Ator Principal</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    A <span class="font-semibold text-blue-600">Secretaria Municipal de Desenvolvimento Urbano (SMDUR)</span> é o órgão responsável por gerenciar, fiscalizar e atualizar o Plano Diretor e todas as questões de zoneamento em Gravataí.
+                </p>
+            </section>
+        </main>
+
+        <!-- CTA Section -->
+        <section class="py-16 hero-gradient rounded-2xl my-16">
+            <div class="text-center">
+                <h2 class="text-4xl font-bold text-white mb-6">Precisa de mais informações?</h2>
+                <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                    Nossa equipe técnica está pronta para esclarecer dúvidas sobre zoneamento e legislação urbana
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="index.html#contato" class="bg-yellow-500 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-yellow-400 transition-colors">
+                        <i class="fas fa-calendar mr-2"></i>Agendar Consultoria
+                    </a>
+                    <a href="viabilidade.html" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-900 transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Ver Estudo de Viabilidade
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-12 rounded-2xl">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="col-span-1 md:col-span-2">
+                        <img src="LOGO_PROPOR_PEQUENO.jpg" alt="Propor Engenharia" class="h-12 mb-4">
+                        <p class="text-gray-400 mb-4">
+                            Especialistas em estudos de viabilidade imobiliária e projetos de engenharia civil.
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                                <i class="fab fa-linkedin text-xl"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                                <i class="fab fa-instagram text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Links Rápidos</h3>
+                        <ul class="space-y-2">
+                            <li><a href="index.html#empreendimento" class="text-gray-400 hover:text-white transition-colors">Empreendimento</a></li>
+                            <li><a href="viabilidade.html" class="text-gray-400 hover:text-white transition-colors">Viabilidade</a></li>
+                            <li><a href="link_zoneamento.html" class="text-gray-400 hover:text-white transition-colors">Análise Técnica</a></li>
+                            <li><a href="index.html#sobre" class="text-gray-400 hover:text-white transition-colors">Sobre Nós</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Contato</h3>
+                        <div class="space-y-2 text-gray-400">
+                            <p><i class="fas fa-phone mr-2"></i>(51) 99999-9999</p>
+                            <p><i class="fas fa-envelope mr-2"></i>contato@propor.eng.br</p>
+                            <p><i class="fas fa-map-marker-alt mr-2"></i>Gravataí/RS</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 my-8"></div>
+                <div class="text-center text-gray-400">
+                    <p>&copy; 2025 Propor Engenharia Ltda. Todos os direitos reservados.</p>
+                    <p class="text-sm mt-2">Painel criado para fins de demonstração e facilitação de acesso à informação pública.</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const linksData = [
+                {
+                    url: 'https://gravatai.atende.net/cidadao/pagina/mapa-georreferenciado-do-municipio',
+                    title: 'Mapa Georreferenciado do Município',
+                    description: 'Fonte principal para o mapa de zoneamento. Requer Google Earth para visualização interativa.',
+                    category: 'mapa',
+                    highlight: true
+                },
+                {
+                    url: 'https://gravatai.atende.net/subportal/novo-plano-diretor-municipal-novopdmgravatai',
+                    title: 'Portal do Novo Plano Diretor',
+                    description: 'Informações sobre o processo de revisão do Plano Diretor. Contém referência e link para o "Mapa Digital do PDDU".',
+                    category: 'portal',
+                    highlight: false
+                },
+                {
+                    url: 'https://gravatai.atende.net/cidadao/pagina/smdur-legislacao-municipal',
+                    title: 'Legislação Municipal (SMDUR)',
+                    description: 'Repositório de leis e decretos sobre desenvolvimento urbano, incluindo o texto do Plano Diretor.',
+                    category: 'legislacao',
+                    highlight: false
+                },
+                {
+                    url: 'https://cespro.com.br/visualizarDiploma.php?cdMunicipio=7545&cdDiploma=20021864',
+                    title: 'Lei de Uso e Ocupação (CESPRO)',
+                    description: 'Texto de lei que referencia a existência de mapas, mas não os disponibiliza diretamente. Fonte externa.',
+                    category: 'legislacao',
+                    highlight: false
+                },
+                {
+                    url: 'https://gravatai.atende.net/subportal/smdur-secretaria-municipal-de-desenvolvimento-urbano',
+                    title: 'Página da SMDUR',
+                    description: 'Portal institucional da secretaria responsável pelo planejamento urbano e pelo Plano Diretor.',
+                    category: 'portal',
+                    highlight: false
+                },
+                {
+                    url: 'https://gravatai.atende.net/',
+                    title: 'Portal da Prefeitura',
+                    description: 'Portal principal da Prefeitura de Gravataí, ponto de partida para serviços e informações municipais.',
+                    category: 'portal',
+                    highlight: false
+                }
+            ];
+
+            const grid = document.getElementById('links-grid');
+            const filterContainer = document.getElementById('filter-container');
+
+            function renderLinks(filter = 'all') {
+                grid.innerHTML = '';
+                const filteredLinks = linksData.filter(link => filter === 'all' || link.category === filter);
+
+                if (filteredLinks.length === 0) {
+                    grid.innerHTML = `<p class="text-gray-500 md:col-span-2 lg:col-span-3 text-center">Nenhum item encontrado para esta categoria.</p>`;
+                    return;
+                }
+
+                filteredLinks.forEach(link => {
+                    const highlightClass = link.highlight ? 'border-blue-500 border-2' : 'border-gray-200 border';
+                    const highlightBadge = link.highlight ? '<div class="absolute top-3 right-3 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full">Principal</div>' : '';
+                    const categoryIcon = {
+                        mapa: '📍',
+                        legislacao: '⚖️',
+                        portal: '🌐'
+                    }[link.category];
+
+                    const card = `
+                        <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card block bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl ${highlightClass} relative">
+                            ${highlightBadge}
+                            <h3 class="text-lg font-semibold text-gray-900 pr-16">${categoryIcon} ${link.title}</h3>
+                            <p class="text-gray-600 mt-2 text-sm leading-relaxed">${link.description}</p>
+                            <div class="text-xs text-blue-600 font-medium mt-4">Acessar Recurso &rarr;</div>
+                        </a>
+                    `;
+                    grid.innerHTML += card;
+                });
+            }
+
+            // Initialize with all links
+            renderLinks();
+
+            // Filter button functionality
+            filterContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('filter-btn')) {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    e.target.classList.add('active');
+                    // Render filtered links
+                    renderLinks(e.target.dataset.filter);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
